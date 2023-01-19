@@ -1,0 +1,23 @@
+{
+  "devDependencies": {
+    "@commitlint/cli": "^17.4.2",
+    "@commitlint/config-conventional": "^17.4.2",
+    "commitizen": "^4.2.6",
+    "cz-conventional-changelog": "^3.3.0",
+    "husky": "^8.0.3",
+    "semantic-release": "^20.0.2"
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
+  },
+  "husky": {
+    "hooks": {
+      "prepare-commit-msg": "exec < /dev/tty && npx cz --hook || true"
+    }
+  },
+  "scripts": {
+    "prepare": "husky install"
+  }
+}
