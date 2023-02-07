@@ -1,6 +1,7 @@
 {
   "conventionalCommits.scopes": [
     "docker",
-    "backend"
+    "backend",
+    "developer experience"
   ]
 }

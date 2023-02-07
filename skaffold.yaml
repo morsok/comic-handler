@@ -1,0 +1,22 @@
+apiVersion: skaffold/v4beta2
+kind: Config
+metadata:
+  name: comic-handler
+build:
+  artifacts:
+  - image: comichandler
+    docker:
+      dockerfile: Dockerfile
+      buildArgs:
+        BUILD_TYPE: development
+  local:
+    push: false
+manifests:
+  rawYaml:
+  - deployment.yaml
+deploy:
+  kubectl: {}
+portForward:
+- resourceType: service
+  resourceName: comichandler
+  port: 8080

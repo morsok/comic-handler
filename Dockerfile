@@ -1,17 +1,18 @@
 # syntax=docker/dockerfile:1
-FROM golang:1.19-alpine AS go_builder
+FROM golang:1.20-alpine AS go_builder
 WORKDIR /go/src/app
 COPY ./backend/go.mod ./backend/go.sum ./
 RUN go mod download && go mod verify
 COPY ./backend .
-RUN CGO_ENABLED=0 go build -o /go/bin/app -v -ldflags="-w -s" ./...
+RUN go build -o /go/bin/app -v ./...
 
 FROM node:18-alpine AS angular_builder
+ARG BUILD_TYPE=production
 RUN npm install -g npm
 RUN npm install -g @angular/cli
 COPY ./frontend /webapp
 WORKDIR /webapp
-RUN npm install && ng build
+RUN npm install && ng build --configuration ${BUILD_TYPE}
 
 FROM scratch
 COPY --from=go_builder /go/bin/app /app/comichandler

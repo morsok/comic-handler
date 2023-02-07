@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: comichandler
+  labels:
+    app: comichandler
+spec:
+  ports:
+  - port: 8080
+    protocol: TCP
+  clusterIP: None
+  selector:
+    app: comichandler
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: comichandler
+  labels:
+    app: comichandler
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: comichandler
+  template:
+    metadata:
+      labels:
+        app: comichandler
+    spec:
+      containers:
+      - name: comichandler
+        image: comichandler
