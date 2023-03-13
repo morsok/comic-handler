@@ -9,6 +9,11 @@ build:
       dockerfile: Dockerfile
       buildArgs:
         BUILD_TYPE: development
+        GIN_MODE: debug
+    sync:
+      manual:
+        - src: 'backend/config/*'
+          dest: /config
   local:
     push: false
 manifests:
@@ -19,4 +24,4 @@ deploy:
 portForward:
 - resourceType: service
   resourceName: comichandler
-  port: 8080
+  port: 9999

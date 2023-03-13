@@ -1,3 +1,8 @@
+// Ignore config directory used for dev
+backend/config/*
+!backend/config/config.yml.default
+backend/comics/*
+!backend/comics/.gitkeep
 # Logs
 logs
 *.log
