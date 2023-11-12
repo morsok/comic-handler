@@ -1,8 +1,9 @@
 // Ignore config directory used for dev
 backend/config/*
-!backend/config/config.yml.default
+!backend/config/.gitkeep
 backend/comics/*
 !backend/comics/.gitkeep
+deployment.yaml
 # Logs
 logs
 *.log
@@ -133,3 +134,7 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+
+# Ignore DevSpace cache and log folder
+.devspace/
