@@ -21,6 +21,7 @@ ENV GIN_MODE=${GIN_MODE}
 COPY --from=go_builder /go/bin/comic-handler /app/comic-handler
 COPY --from=angular_builder /webapp/dist/frontend/* /app/static/
 COPY ./backend/config /config
+RUN mkdir /watch /comics
 WORKDIR /app
 
 ENTRYPOINT ["/app/comic-handler"]

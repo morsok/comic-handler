@@ -10,6 +10,7 @@ import (
 
 	"github.com/charmbracelet/log"
 	"github.com/morsok/comic-handler/ent"
+	"github.com/spf13/viper"
 
 	"entgo.io/ent/dialect"
 	"github.com/gin-gonic/gin"
@@ -19,9 +20,25 @@ import (
 func main() {
   log.SetTimeFormat(time.StampMilli)
   // Load Config
-  log.Info("Loading Configuration")
-  // TODO Load configuration
-  log.SetLevel(log.DebugLevel) // TODO Set from conf
+  log.Debug("Loading Configuration")
+  viper.SetDefault("LogLevel", "info")
+  viper.SetDefault("directories.config", "/config")
+  viper.SetDefault("directories.comics", "/comics")
+  viper.SetDefault("directories.watch", "/watch")
+  viper.SetConfigName("config")
+  viper.SetConfigType("yaml")
+  viper.AddConfigPath("/config")
+  if err := viper.ReadInConfig(); err != nil {
+    if _, ok := err.(viper.ConfigFileNotFoundError); ok {
+      log.Info("No config file found, creating default one")
+      viper.SafeWriteConfig()
+    } else {
+      log.Fatal(fmt.Errorf("fatal error config file: %w", err))
+    }
+  }
+  log.Info("Configuration loaded")
+  // Config file found and successfully parsed
+  log.SetLevel(log.ParseLevel(viper.GetString("LogLevel")))
   // Database
   // Create an ent.Client with in-memory SQLite database.
   log.Debug("Opening internal sqlite DB")
@@ -30,7 +47,7 @@ func main() {
       log.Fatal(fmt.Sprintf("Failed opening connection to internal sqlite DB: %v", err))
   }
   defer dbClient.Close()
-  log.Debug("DB openned with success")
+  log.Debug("DB opened with success")
   ctx := context.Background()
   // Run the automatic migration tool to create all schema resources.
   log.Debug("Initializing the DB and/or running migrations")
@@ -65,5 +82,6 @@ func main() {
       c.String(http.StatusOK, "Welcome Gin Server v1")
     })
 	}
-  router.Run("localhost:9999")
+  log.Debug("Starting web server")
+  router.Run("0.0.0.0:9999")
 }
