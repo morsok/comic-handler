@@ -3,7 +3,9 @@ package main
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"net/http"
+	"os"
 	"path"
 	"path/filepath"
 	"time"
@@ -18,9 +20,11 @@ import (
 )
 
 func main() {
-  log.SetTimeFormat(time.StampMilli)
+  handler := log.New(os.Stderr)
+  logger := slog.New(handler)
+  handler.SetTimeFormat(time.StampMilli)
   // Load Config
-  log.Debug("Loading Configuration")
+  logger.Debug("Loading Configuration")
   viper.SetDefault("LogLevel", "info")
   viper.SetDefault("directories.config", "/config")
   viper.SetDefault("directories.comics", "/comics")
@@ -38,30 +42,37 @@ func main() {
   }
   log.Info("Configuration loaded")
   // Config file found and successfully parsed
-  log.SetLevel(log.ParseLevel(viper.GetString("LogLevel")))
+  level, err := log.ParseLevel(viper.GetString("LogLevel"))
+  if err != nil {
+    logger.Error(fmt.Sprintf("failed to parse log level, reverting to INFO: %v", err))
+    level = log.InfoLevel
+  }
+  handler.SetLevel(level)
   // Database
   // Create an ent.Client with in-memory SQLite database.
-  log.Debug("Opening internal sqlite DB")
+  logger.Debug("Opening internal sqlite DB")
   dbClient, err := ent.Open(dialect.SQLite, "file:comichandler.db?mode=memory&cache=shared&_fk=1") // TODO: use file DB
   if err != nil {
-      log.Fatal(fmt.Sprintf("Failed opening connection to internal sqlite DB: %v", err))
+    logger.Error(fmt.Sprintf("Failed opening connection to internal sqlite DB: %v", err))
+    os.Exit(1)
   }
   defer dbClient.Close()
-  log.Debug("DB opened with success")
+  logger.Debug("DB opened with success")
   ctx := context.Background()
   // Run the automatic migration tool to create all schema resources.
-  log.Debug("Initializing the DB and/or running migrations")
-  if err := dbClient.Schema.Create(ctx); err != nil {
-      log.Fatal(fmt.Sprintf("Database initialization: Failed creating schema resources: %v", err))
+  logger.Debug("Initializing the DB and/or running migrations")
+  if err := dbClient.Schema.Create(ctx, schema.WithAtlas(true), migrate.WithGlobalUniqueID(true)); err != nil {
+    logger.Error(fmt.Sprintf("Database initialization: Failed creating schema resources: %v", err))
+    os.Exit(1)
   }
-  log.Debug("DB init and/or migrations success")
+  logger.Debug("DB init and/or migrations success")
 
   // TMP
   serieTest, err := dbClient.Serie.Create().Save(ctx)
   if err != nil {
-      log.Fatal(fmt.Sprintf("Failed creating a test serie: %v", err))
+    logger.Error(fmt.Sprintf("Failed creating a test serie: %v", err))
   }
-  log.Debug("New task added to db", "task", serieTest)
+  logger.Debug("New task added to db", "task", serieTest)
   // END TMP
 
   // HTTP Server
@@ -82,6 +93,6 @@ func main() {
       c.String(http.StatusOK, "Welcome Gin Server v1")
     })
 	}
-  log.Debug("Starting web server")
+  logger.Debug("Starting web server")
   router.Run("0.0.0.0:9999")
 }

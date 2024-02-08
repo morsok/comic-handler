@@ -8,6 +8,12 @@ images:
     image: comichandler
     entrypoint:
       - /app/comic-handler
+    build:
+      docker:
+        options:
+          buildArgs:
+            BUILD_TYPE: development
+            GIN_MODE: debug
 
 # This is a list of `deployments` that DevSpace can create for this project
 deployments:
@@ -51,8 +57,8 @@ dev:
   comichandler:
     labelSelector:
       app.kubernetes.io/component: comichandler
-    command:
-      - /app/comic-handler
+    # command:
+    #   - /app/comic-handler
     # Sync files between the local filesystem and the development container
     sync:
       - path: ./backend/config:/config
@@ -67,7 +73,7 @@ dev:
     open:
       - url: http://localhost:9999
       - url: http://localhost:8090
-
+    logs: {}
 # Define dependencies to other projects with a devspace.yaml
 # dependencies:
 #   api:
