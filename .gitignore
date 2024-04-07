@@ -3,7 +3,7 @@ backend/config/*
 !backend/config/.gitkeep
 backend/comics/*
 !backend/comics/.gitkeep
-deployment.yaml
+backend/target
 # Logs
 logs
 *.log

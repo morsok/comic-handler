@@ -1,13 +1,10 @@
 # syntax=docker/dockerfile:1
-FROM golang:1.20-alpine AS go_builder
-RUN apk add build-base git musl-dev
-WORKDIR /go/src/app
-COPY ./backend/go.mod ./backend/go.sum ./
-RUN go mod download && go mod verify
+FROM rust:1.77 as rust_builder
+WORKDIR /comichandler
 COPY ./backend .
-RUN CGO_ENABLED=1 go build -o /go/bin/ -v -a -ldflags "-linkmode external -extldflags '-static' -s -w" ./...
+RUN cargo build --release
 
-FROM node:18-alpine AS angular_builder
+FROM node:20-alpine AS angular_builder
 ARG BUILD_TYPE=production
 RUN npm install -g npm
 RUN npm install -g @angular/cli
@@ -15,15 +12,13 @@ COPY ./frontend /webapp
 WORKDIR /webapp
 RUN npm install && ng build --configuration ${BUILD_TYPE}
 
-FROM golang:1.20-alpine
-ARG GIN_MODE=release
-ENV GIN_MODE=${GIN_MODE}
-COPY --from=go_builder /go/bin/comic-handler /app/comic-handler
+FROM rust:1.77-slim
+COPY --from=rust_builder /comichandler/target/release/comichandler /app/comichandler
 COPY --from=angular_builder /webapp/dist/frontend/* /app/static/
 COPY ./backend/config /config
 RUN mkdir /watch /comics
 WORKDIR /app
 
-ENTRYPOINT ["/app/comic-handler"]
-LABEL Name=comic-handler Version=0.0.1
+ENTRYPOINT ["/app/comichandler"]
+LABEL Name=comichandler Version=0.0.1
 EXPOSE 9999
