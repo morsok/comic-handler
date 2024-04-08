@@ -32,7 +32,7 @@ cargo run
 Then run the frontend
 
 ```shell
-npm watch
+npm run watch
 ```
 
 ### Backend
