@@ -1,0 +1,22 @@
+FROM rust:1.81
+
+WORKDIR /app
+
+# Install cargo-watch for hot-reloading
+RUN cargo install cargo-watch
+
+# Copy the Cargo.toml and Cargo.lock files first
+COPY Cargo.toml Cargo.lock* ./
+
+# This is a trick to pre-build dependencies
+RUN mkdir src && \
+    echo "fn main() {println!(\"dummy\");}" > src/main.rs && \
+    cargo build && \
+    rm -rf src target
+
+# The source code will be mounted as a volume
+
+EXPOSE 9999
+
+# Use cargo-watch to automatically rebuild and restart the application when source changes
+CMD ["cargo", "watch", "-x", "run", "-w", "src"]

@@ -1,0 +1,45 @@
+<div class="app-container">
+  <header class="app-header">
+    <div class="header-content">
+      <h1 class="app-title">{{ title() }}</h1>
+      <button 
+        class="theme-toggle" 
+        (click)="toggleTheme()"
+        [attr.aria-label]="isDarkMode() ? 'Switch to light mode' : 'Switch to dark mode'">
+        @if (isDarkMode()) {
+          ☀️
+        } @else {
+          🌙
+        }
+      </button>
+    </div>
+  </header>
+
+  <main class="main-content">
+    @if (loading()) {
+      <div class="loading">
+        <div class="spinner"></div>
+        <p>Loading comics...</p>
+      </div>
+    } @else if (error()) {
+      <div class="error">
+        <h2>Error loading comics</h2>
+        <p>{{ error() }}</p>
+        <button class="btn btn-primary" (click)="loadComics()">Try Again</button>
+      </div>
+    } @else {
+      <div class="comics-section">
+        <div class="section-header">
+          <h2>Comic Collection</h2>
+          <p class="comics-count">{{ comics().length }} comics available</p>
+        </div>
+        
+        <div class="comics-grid">
+          @for (comic of comics(); track comic.id) {
+            <app-comic-card [comic]="comic" />
+          }
+        </div>
+      </div>
+    }
+  </main>
+</div>

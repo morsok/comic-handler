@@ -1,0 +1,19 @@
+{
+  "copilot.instructions": {
+    "docker-compose": {
+      "syntax": "docker compose",
+      "description": "Always use 'docker compose' (with space) instead of 'docker-compose' (with hyphen)",
+      "correct_examples": [
+        "docker compose up",
+        "docker compose down", 
+        "docker compose build",
+        "docker compose -f docker-compose.dev.yml up --build",
+        "docker compose -f docker-compose.dev.yml restart backend",
+        "docker compose -f docker-compose.dev.yml logs -f frontend"
+      ],
+      "deprecated_syntax": "docker-compose",
+      "reason": "docker-compose is deprecated. Use docker compose (Docker Compose V2 plugin)",
+      "apply_to": ["scripts", "documentation", "tasks", "terminals", "code_suggestions"]
+    }
+  }
+}
